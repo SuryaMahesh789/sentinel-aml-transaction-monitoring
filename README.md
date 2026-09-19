@@ -104,3 +104,50 @@ Each detected pattern produces an explainable result that can be converted into 
                          ┌─────────────────────────┐
                          │       PostgreSQL        │
                          └─────────────────────────┘
+
+🔄 Transaction Processing Flow
+Customer / Account Data
+          │
+          ▼
+     CSV Ingestion
+          │
+          ▼
+      PostgreSQL
+          │
+          │
+Transaction REST API
+          │
+          ▼
+   Input Validation
+          │
+          ▼
+    INR Normalization
+          │
+          ▼
+   Transaction Persist
+          │
+          ▼
+    Detection Engine
+          │
+     ┌────┴────┐
+     │         │
+     ▼         ▼
+  AML Rules  Historical
+             Analysis
+     │         │
+     └────┬────┘
+          ▼
+   Detection Results
+          │
+          ▼
+     Risk Scoring
+          │
+          ▼
+        Alert
+          │
+          ▼
+   Investigation / Case
+
+   🚨 AML Detection Rules
+
+
