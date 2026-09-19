@@ -21,6 +21,15 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
 
     List<Alert> findByCustomer_CustomerIdAndStatus(String customerId, AlertStatus status);
 
+    /** Filtered paginated query — status and ruleCode are optional (null = no filter) */
+    @Query("SELECT a FROM Alert a WHERE " +
+           "(:status IS NULL OR a.status = :status) AND " +
+           "(:ruleCode IS NULL OR a.rule.ruleCode = :ruleCode)")
+    Page<Alert> findByFilters(
+            @Param("status") AlertStatus status,
+            @Param("ruleCode") String ruleCode,
+            Pageable pageable);
+
     /** Check for existing open alert for same customer + rule — used for de-duplication */
     @Query("SELECT a FROM Alert a WHERE a.customer.customerId = :customerId " +
            "AND a.rule.ruleCode = :ruleCode " +

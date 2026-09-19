@@ -54,9 +54,16 @@ public class DetectionEngine {
                         createdAlerts.add(alert);
                     }
                 });
+            } catch (RuntimeException e) {
+                // Re-throw persistence/infrastructure failures — these must not be swallowed,
+                // as they indicate the alert was NOT saved (e.g. FK violation, DB error).
+                // Only catch-and-continue for rule evaluation bugs (logged below).
+                log.error("Rule {} failed for txn {}: {}",
+                        rule.getRuleCode(), transaction.getTransactionRef(), e.getMessage(), e);
+                throw e;
             } catch (Exception e) {
-                // Isolate rule failures — one failing rule must not block others
-                log.error("Rule {} threw exception for txn {}: {}",
+                // Checked exceptions from rule evaluation — isolate and continue
+                log.error("Rule {} threw checked exception for txn {}: {}",
                         rule.getRuleCode(), transaction.getTransactionRef(), e.getMessage(), e);
             }
         }

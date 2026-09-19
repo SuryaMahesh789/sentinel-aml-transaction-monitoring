@@ -8,7 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "cases")
+@Table(name = "cases", indexes = {
+        @Index(name = "idx_cases_status",      columnList = "status"),
+        @Index(name = "idx_cases_assigned_to", columnList = "assigned_to"),
+        @Index(name = "idx_cases_customer_id", columnList = "customer_id")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,9 +24,11 @@ public class Case {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Human-readable unique reference, e.g. CASE-20240915-001 */
     @Column(name = "case_ref", nullable = false, unique = true, length = 80)
     private String caseRef;
 
+    /** Customer the case is investigating */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
@@ -51,6 +57,15 @@ public class Case {
     @Column(name = "closed_at")
     private LocalDateTime closedAt;
 
+    /** Ongoing investigation notes — updated as analyst works the case */
+    @Column(name = "investigation_notes", columnDefinition = "TEXT")
+    private String investigationNotes;
+
+    /** Required when closing a case — explains the outcome */
+    @Column(name = "resolution_reason", columnDefinition = "TEXT")
+    private String resolutionReason;
+
+    /** Legacy closure notes field kept for schema compatibility */
     @Column(name = "closure_notes", columnDefinition = "TEXT")
     private String closureNotes;
 
@@ -63,7 +78,7 @@ public class Case {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    /** Alerts linked to this case */
+    /** Alerts linked to this case (via join table) */
     @OneToMany(mappedBy = "linkedCase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<CaseAlert> caseAlerts = new ArrayList<>();
@@ -83,7 +98,12 @@ public class Case {
     }
 
     public enum CaseStatus {
-        OPEN, IN_PROGRESS, PENDING_REVIEW, ESCALATED, CLOSED_SAR, CLOSED_NO_ACTION
+        OPEN,
+        IN_PROGRESS,
+        PENDING_REVIEW,
+        ESCALATED,
+        CLOSED_SAR,          // closed with SAR filed
+        CLOSED_NO_ACTION     // closed with no further action
     }
 
     public enum Priority {
