@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:sentinel_test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL;NON_KEYWORDS=VALUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  flyway:
+    enabled: false   # Flyway disabled for unit tests — Hibernate creates schema via ddl-auto
+
+  security:
+    user:
+      name: admin
+      password: admin123
+
+aml:
+  rules:
+    ctr-threshold-inr: 833000
+    structuring:
+      min-amount-inr: 749700
+      max-amount-inr: 832999
+      count-threshold: 3
+      window-hours: 24
+    rapid-movement:
+      outflow-percent-threshold: 80
+      window-hours: 48
+    behavioral-deviation:
+      rolling-days: 90
+      multiplier-threshold: 3.0
+
+logging:
+  level:
+    com.sentinel.aml: WARN
